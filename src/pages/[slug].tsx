@@ -1,4 +1,4 @@
-import { type NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import dayjs from "dayjs";
@@ -59,21 +59,20 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   );
 };
 
+import { PageLayout } from "~/components/layout";
+import { LoadingPage } from "~/components/loading";
+import { PostView } from "~/components/postview";
+import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import superjson from "superjson";
-import { PageLayout } from "~/components/layout";
-import { LoadingPage } from "~/components/loading";
-import { PostView } from "~/components/postview";
-
-export const getStaticProps = async (context: { params: { slug: any } }) => {
+export const getStaticProps: GetStaticProps = async (context) => {
   const ssg = createProxySSGHelpers({
     router: appRouter,
     ctx: { prisma, userId: null },
     transformer: superjson,
   });
-
   const slug = context.params?.slug;
   if (typeof slug !== "string") throw new Error("no slug");
 
@@ -88,7 +87,7 @@ export const getStaticProps = async (context: { params: { slug: any } }) => {
   };
 };
 
-export const getStaticPaths = async () => {
+export const getStaticPaths = () => {
   return { paths: [], fallback: "blocking" };
 };
 
